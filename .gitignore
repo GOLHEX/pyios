@@ -1,0 +1,26 @@
+# Python-specific
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# VS Code-specific
+.vscode/
+
+# Pygame-specific (если есть временные файлы)
+*.tmp
+*.bak
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
