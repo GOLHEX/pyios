@@ -1,55 +1,46 @@
-# Math, coordinate conversions, etc.
+# src/utils/helpers.py
+
+from collections import namedtuple
 import math
-import math
+from src.utils.hex_utils import Layout, layout_flat, Point, Hex  # Импортируем Layout, layout_flat, Point и новый Hex
 
-def hex_to_pixel(q, r, size=30):
+# Конфигурация Layout
+HEX_SIZE = 21
+layout = Layout(
+    orientation=layout_flat,
+    size=Point(HEX_SIZE, HEX_SIZE),
+    origin=Point(0, 0)
+)
+
+# Обёртки для преобразований, используя методы нового класса Hex:
+
+def hex_to_pixel(layout, h: Hex) -> Point:
+    """Преобразует кубические координаты h в пиксельные, вызывая метод to_pixel."""
+    return h.to_pixel(layout)
+
+def pixel_to_hex(layout, p: Point) -> Hex:
+    """Преобразует пиксельные координаты в кубические, используя обратное преобразование."""
+    M = layout.orientation
+    size = layout.size
+    origin = layout.origin
+    pt = Point((p.x - origin.x) / size.x, (p.y - origin.y) / size.y)
+    q = M.b0 * pt.x + M.b1 * pt.y
+    r = M.b2 * pt.x + M.b3 * pt.y
+    return Hex.round(Hex(q, r, -q - r))
+
+def polygon_corners(layout, h: Hex):
+    """Возвращает углы шестиугольника h для отрисовки."""
+    return h.polygon_corners(layout)
+
+def get_hex_corners(q, r, s):
     """
-    Convert hex coordinates (q, r) to pixel coordinates (x, y) for flat-top hexagons.
+    Возвращает список углов шестиугольника в пиксельных координатах для Hex(q, r, s).
     """
-    x = size * (3/2 * q)
-    y = size * (math.sqrt(3)/2 * q + math.sqrt(3) * r)
-    return x, y
-
-def get_hex_corners(center_x, center_y, size):
-    """
-    Return the six corners of a flat-top hexagon centered at (center_x, center_y).
-    """
-    corners = []
-    for i in range(6):
-        angle_deg = 60 * i
-        angle_rad = math.radians(angle_deg)
-        x = center_x + size * math.cos(angle_rad)
-        y = center_y + size * math.sin(angle_rad)
-        corners.append((x, y))
-    return corners
-
-def pixel_to_hex(x, y, size=30):
-    """
-    Convert pixel coordinates (x, y) to hex coordinates (q, r) for flat-top hexagons.
-    Returns the nearest hex coordinates as a (q, r) tuple.
-    """
-    # Inverse of hex_to_pixel
-    q = (2/3 * x) / size
-    r = (-1/3 * x + math.sqrt(3)/3 * y) / size
-
-    # Convert to cube coordinates for rounding
-    s = -q - r
-
-    # Round to the nearest hex
-    q = round(q)
-    r = round(r)
-    s = round(s)
-
-    # Correct for rounding errors by finding the closest hex
-    q_diff = abs(q - (2/3 * x) / size)
-    r_diff = abs(r - (-1/3 * x + math.sqrt(3)/3 * y) / size)
-    s_diff = abs(s - (-q - r))
-
-    if q_diff > r_diff and q_diff > s_diff:
-        q = -r - s
-    elif r_diff > s_diff:
-        r = -q - s
-    else:
-        s = -q - r
-
-    return q, r
+    try:
+        hex_obj = Hex(q, r, s)
+        corners = polygon_corners(layout, hex_obj)
+        if corners is None:
+            return []
+        return corners
+    except Exception as e:
+        return []

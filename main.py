@@ -1,14 +1,18 @@
+###/main.py
 from src.core.hex_grid import HexGrid
 from src.rendering.renderer import Renderer
+import time
 
 def main():
-    # Initialize the grid
+    # Инициализация сетки
     grid = HexGrid()
-    grid.generate_hexagonal_grid(radius=13)
+    grid.generate_hexagonal_grid(radius=3)  # Убедитесь, что эта строка присутствует
 
-    # Initialize the renderer
+    # Инициализация рендерера
     renderer = Renderer(grid, screen_width=1024, screen_height=1024, hex_size=21)
     renderer.run()
 
 if __name__ == "__main__":
     main()
+
+    
