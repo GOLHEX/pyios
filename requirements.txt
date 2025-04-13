@@ -1,0 +1,2 @@
+# Dependencies
+pygame==2.5.2
